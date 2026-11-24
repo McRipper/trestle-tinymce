@@ -5,8 +5,8 @@
 
 > TinyMCE integration plugin for the Trestle admin framework
 
-- Supports TinyMCE 5.x and 6.x (via [tinymce-rails](https://github.com/spohlenz/tinymce-rails/))
-- Includes custom themes for supported TinyMCE versions
+- Supports TinyMCE 5 through 8 via [tinymce-rails](https://github.com/spohlenz/tinymce-rails/)
+- Includes Trestle skins for TinyMCE 5 and 6 and uses the built-in Oxide skin for 7 and 8
 
 <img width="960" alt="Trestle TinyMCE Integration Screenshot" src="https://github.com/user-attachments/assets/d55eb5f2-5317-434d-9f01-ea13761e3bbf">
 
@@ -31,12 +31,11 @@ Trestle.resource(:articles) do
 end
 ```
 
-The default TinyMCE configuration can be edited by defining options within `config/initializers/trestle.rb`. The default configuration is shown below:
+Configure the editor in `config/initializers/trestle.rb`. For example:
 
 ```ruby
 Trestle.configure do |config|
   config.tinymce.default.configure do |c|
-    c.skin = "trestle/tinymce-6" # or "trestle/tinymce-5" depending on current version of tinymce-rails
     c.branding = false
     c.elementpath = false
     c.menubar = false
@@ -48,13 +47,15 @@ Trestle.configure do |config|
       :charmap,
       :table,
       :code
-    ] # also includes [:hr, :paste] on TinyMCE 5
-    c.toolbar = "styleselect | bold italic underline strikethrough | subscript superscript hr | alignleft aligncenter alignright alignjustify | bullist numlist | indent outdent | undo redo | link unlink | image charmap table | code"
+    ]
+    c.toolbar = "styles | bold italic underline strikethrough | subscript superscript hr | alignleft aligncenter alignright alignjustify | bullist numlist | indent outdent | undo redo | link unlink | image charmap table | code"
     c.link_context_toolbar = true
     c.convert_urls = false
   end
 end
 ```
+
+TinyMCE 5 uses `styleselect` and needs the `hr` and `paste` plugins. When upgrading to 7 or 8, remove any `trestle/tinymce-5` or `trestle/tinymce-6` skin override to use Oxide.
 
 Alternate configurations can be defined in a similar fashion:
 
@@ -104,6 +105,20 @@ Trestle.configure do |config|
   end
 end
 ```
+
+### License configuration for self-hosted TinyMCE 7 and 8
+
+Set `license_key` on each editor configuration. Choose `"gpl"` only if you intend to use TinyMCE under GPLv2+. For a commercial TinyMCE 8 installation, supply a valid `T8LK:` key and load the commercial License Key Manager before initializing the editor. See [TinyMCE's licensing documentation](https://www.tiny.cloud/docs/tinymce/latest/license-key/) for the applicable options.
+
+```ruby
+Trestle.configure do |config|
+  config.tinymce.default.configure do |c|
+    c.license_key = ENV.fetch("TINYMCE_LICENSE_KEY")
+  end
+end
+```
+
+Run `bin/rails assets:precompile` when deploying self-hosted TinyMCE. The `tinymce_assets` helper and `tinymce-rails` precompile task set up the base URL and files needed by dynamically loaded plugins and skins.
 
 For further information, please see [tinymce-rails](https://github.com/spohlenz/tinymce-rails) and the [TinyMCE documentation](https://www.tiny.cloud/docs/configure/).
 

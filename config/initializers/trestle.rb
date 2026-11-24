@@ -1,6 +1,7 @@
 Trestle.configure do |config|
   config.tinymce.default.configure do |c|
-    c.skin = "trestle/tinymce-#{Trestle::TinyMCE.tinymce_major_version}"
+    major_version = Trestle::TinyMCE.tinymce_major_version
+    c.skin = major_version < 7 ? "trestle/tinymce-#{major_version}" : "oxide"
     c.branding = false
     c.promotion = false
     c.elementpath = false
@@ -14,12 +15,9 @@ Trestle.configure do |config|
       :table,
       :code
     ]
-    if Trestle::TinyMCE.tinymce_major_version == 6
-      c.toolbar = "styles | bold italic underline strikethrough | subscript superscript hr | alignleft aligncenter alignright alignjustify | bullist numlist | indent outdent | undo redo | link unlink | image charmap table | code"
-    else
-      c.toolbar = "styleselect | bold italic underline strikethrough | subscript superscript hr | alignleft aligncenter alignright alignjustify | bullist numlist | indent outdent | undo redo | link unlink | image charmap table | code"
-      c.plugins << :hr << :paste
-    end
+    styles = major_version == 5 ? "styleselect" : "styles"
+    c.toolbar = "#{styles} | bold italic underline strikethrough | subscript superscript hr | alignleft aligncenter alignright alignjustify | bullist numlist | indent outdent | undo redo | link unlink | image charmap table | code"
+    c.plugins.concat([:hr, :paste]) if major_version == 5
     c.link_context_toolbar = true
     c.convert_urls = false
   end

@@ -9,18 +9,38 @@ export default class extends Trestle.ApplicationController {
   }
 
   connect () {
+    const { setup, ...configuration } = this.configuration || {}
+    const initialization = {}
+    const controller = this
+
+    this.initialization = initialization
+    this.element.ownerDocument.addEventListener('turbo:before-cache', this.removeEditor)
+
     tinymce.init({
       target: this.element,
-      ...this.configuration
+      ...configuration,
+      setup (editor) {
+        if (controller.initialization !== initialization) {
+          // TinyMCE may construct the editor after the controller has disconnected.
+          queueMicrotask(() => editor.remove())
+          return
+        }
+
+        initialization.editor = editor
+        if (typeof setup === 'function') setup.call(this, editor)
+      }
     })
   }
 
   disconnect () {
-    const editor = tinymce.get(this.element.id)
+    this.element.ownerDocument.removeEventListener('turbo:before-cache', this.removeEditor)
+    this.removeEditor()
+  }
 
-    if (editor) {
-      editor.remove()
-    }
+  removeEditor = () => {
+    const editor = this.initialization?.editor
+    this.initialization = undefined
+    editor?.remove()
   }
 
   get configuration () {

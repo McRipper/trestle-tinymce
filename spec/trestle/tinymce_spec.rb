@@ -8,6 +8,9 @@ describe Trestle::TinyMCE do
 
       stub_const("TinyMCE::Rails::VERSION", "5.10.9")
       expect(described_class.tinymce_major_version).to eq(5)
+
+      stub_const("TinyMCE::Rails::VERSION", "8.10.2")
+      expect(described_class.tinymce_major_version).to eq(8)
     end
   end
 end
